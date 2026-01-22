@@ -31,10 +31,11 @@ jobs:
     - name: Accept Android SDK Licenses
       run: yes | sdkmanager --licenses || true
       
+    - name: Make build script executable
+      run: chmod +x build.sh
+      
     - name: Build Debug APK
-      run: ./gradlew assembleDebug --stacktrace --no-daemon --warning-mode all
-      env:
-        GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx2048m -XX:MaxMetaspaceSize=512m"
+      run: ./build.sh
       
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
