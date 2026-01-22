@@ -22,10 +22,11 @@ import com.netwatch.firewall.presentation.applist.AppListViewModel
 import com.netwatch.firewall.presentation.applist.AppListViewModelFactory
 import com.netwatch.firewall.service.vpn.NetWatchVpnService
 import com.netwatch.firewall.ui.theme.NetWatchTheme
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     
-    private var appListViewModel: AppListViewModel? = null
+    internal var appListViewModel: AppListViewModel? = null
     
     // VPN permission launcher
     private val vpnPermissionLauncher = registerForActivityResult(
@@ -72,7 +73,7 @@ class MainActivity : ComponentActivity() {
         } else {
             stopVpnService()
         }
-        viewModel.toggleVpnService(start)
+        appListViewModel?.toggleVpnService(start)
     }
     
     private fun startVpnService() {
@@ -96,7 +97,7 @@ class MainActivity : ComponentActivity() {
 fun NetWatchApp(
     onToggleVpn: (Boolean) -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val activity = context as MainActivity
     
     val viewModel: AppListViewModel = viewModel(
