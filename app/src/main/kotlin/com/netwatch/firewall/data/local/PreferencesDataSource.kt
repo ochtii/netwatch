@@ -9,12 +9,13 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+// Top-level extension for DataStore
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "netwatch_preferences")
+
 /**
  * DataStore-based data source for app preferences (blocked apps list)
  */
 class PreferencesDataSource(private val context: Context) {
-    
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "netwatch_preferences")
     
     companion object {
         private val BLOCKED_PACKAGES_KEY = stringSetPreferencesKey("blocked_packages")
