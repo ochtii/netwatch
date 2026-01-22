@@ -25,7 +25,7 @@ import com.netwatch.firewall.ui.theme.NetWatchTheme
 
 class MainActivity : ComponentActivity() {
     
-    lateinit var viewModel: AppListViewModel
+    private var appListViewModel: AppListViewModel? = null
     
     // VPN permission launcher
     private val vpnPermissionLauncher = registerForActivityResult(
@@ -37,7 +37,7 @@ class MainActivity : ComponentActivity() {
         } else {
             // Permission denied
             Toast.makeText(this, "VPN permission denied", Toast.LENGTH_SHORT).show()
-            viewModel.toggleVpnService(false)
+            appListViewModel?.toggleVpnService(false)
         }
     }
     
@@ -104,7 +104,7 @@ fun NetWatchApp(
     )
     
     // Store viewModel reference in activity for VPN callbacks
-    activity.viewModel = viewModel
+    activity.appListViewModel = viewModel
     
     val uiState by viewModel.uiState.collectAsState()
     val isVpnActive by viewModel.isVpnActive.collectAsState()
