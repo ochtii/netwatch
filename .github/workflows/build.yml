@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
     - name: Checkout code
@@ -31,11 +32,10 @@ jobs:
     - name: Accept Android SDK Licenses
       run: yes | sdkmanager --licenses || true
       
-    - name: Make build script executable
-      run: chmod +x build.sh
-      
     - name: Build Debug APK
-      run: ./build.sh
+      run: |
+        export GRADLE_OPTS="-Xmx3072m -XX:MaxMetaspaceSize=768m -XX:+UseParallelGC"
+        ./gradlew clean assembleDebug --no-daemon --stacktrace --max-workers=2
       
     - name: Upload Debug APK
       uses: actions/upload-artifact@v4
