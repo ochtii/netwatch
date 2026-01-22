@@ -42,23 +42,28 @@ class AppRepositoryImpl(
     }
     
     private fun getInstalledAppsFlow(): Flow<List<AppEntry>> = flow {
-        val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-            .filter { appInfo ->
-                // Filter to only user-installed apps (exclude system apps)
-                (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
-            }
-            .map { appInfo ->
-                AppEntry(
-                    packageName = appInfo.packageName,
-                    uid = appInfo.uid,
-                    label = packageManager.getApplicationLabel(appInfo).toString(),
-                    icon = packageManager.getApplicationIcon(appInfo),
-                    dataSent = 0L,
-                    dataReceived = 0L,
-                    isBlocked = false
-                )
-            }
-        emit(apps)
+        try {
+            val apps = packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                .filter { appInfo ->
+                    // Filter to only user-installed apps (exclude system apps)
+                    (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) == 0
+                }
+                .map { appInfo ->
+                    AppEntry(
+                        packageName = appInfo.packageName,
+                        uid = appInfo.uid,
+                        label = packageManager.getApplicationLabel(appInfo).toString(),
+                        icon = packageManager.getApplicationIcon(appInfo),
+                        dataSent = 0L,
+                        dataReceived = 0L,
+                        isBlocked = false
+                    )
+                }
+            emit(apps)
+        } catch (e: Exception) {
+            // Fallback to empty list if permission denied
+            emit(emptyList())
+        }
     }
     
     override fun getBlockedPackages(): Flow<Set<String>> {
