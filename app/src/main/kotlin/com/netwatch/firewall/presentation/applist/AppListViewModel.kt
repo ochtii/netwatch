@@ -25,7 +25,13 @@ class AppListViewModel(
     val isVpnActive: StateFlow<Boolean> = _isVpnActive.asStateFlow()
 
     init {
-        loadApps()
+        try {
+            loadApps()
+        } catch (e: Exception) {
+            _uiState.value = AppListUiState.Error(
+                "Failed to initialize: ${e.message}"
+            )
+        }
     }
 
     /**

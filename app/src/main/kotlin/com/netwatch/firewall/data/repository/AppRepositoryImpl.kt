@@ -27,17 +27,22 @@ class AppRepositoryImpl(
     private val dataUsageMap = ConcurrentHashMap<Int, Pair<Long, Long>>()
     
     override fun getInstalledApps(): Flow<List<AppEntry>> {
-        return combine(
-            getInstalledAppsFlow(),
-            preferencesDataSource.getBlockedPackages()
-        ) { apps, blockedPackages ->
-            apps.map { app ->
-                app.copy(
-                    isBlocked = app.packageName in blockedPackages,
-                    dataSent = dataUsageMap[app.uid]?.first ?: 0L,
-                    dataReceived = dataUsageMap[app.uid]?.second ?: 0L
-                )
-            }.sortedBy { it.label.lowercase() }
+        return try {
+            combine(
+                getInstalledAppsFlow(),
+                preferencesDataSource.getBlockedPackages()
+            ) { apps, blockedPackages ->
+                apps.map { app ->
+                    app.copy(
+                        isBlocked = app.packageName in blockedPackages,
+                        dataSent = dataUsageMap[app.uid]?.first ?: 0L,
+                        dataReceived = dataUsageMap[app.uid]?.second ?: 0L
+                    )
+                }.sortedBy { it.label.lowercase() }
+            }
+        } catch (e: Exception) {
+            // Return empty flow on error
+            flow { emit(emptyList<AppEntry>()) }
         }
     }
     
