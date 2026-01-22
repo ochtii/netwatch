@@ -1,5 +1,8 @@
 # NetWatch - Android Firewall & Data Usage Tracker
 
+[![Android CI](https://github.com/ochtii/netwatch/actions/workflows/build.yml/badge.svg)](https://github.com/ochtii/netwatch/actions/workflows/build.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A no-root local firewall and network monitoring app for Android, built with Jetpack Compose and Material 3.
 
 ## Features
@@ -45,12 +48,21 @@ app/src/main/kotlin/com/netwatch/firewall/
 
 ## Build & Run
 
+### Option 1: Download APK from GitHub Actions
+1. Go to [Actions](https://github.com/ochtii/netwatch/actions)
+2. Click on the latest successful workflow run
+3. Download the `netwatch-debug-apk` artifact
+4. Extract and install the APK on your Android device
+
+### Option 2: Build Locally
 See [BUILD.md](BUILD.md) for detailed build instructions.
 
 **Quick Start:**
 ```bash
 ./gradlew assembleDebug
 ```
+
+The APK will be generated at: `app/build/outputs/apk/debug/app-debug.apk`
 
 ## Development Status
 ✅ **Complete** - All 4 steps implemented:
