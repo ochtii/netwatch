@@ -1,60 +1,71 @@
-name: Android CI - Build APK
+name: Build Android APK
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
+    name: Build APK
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: gradle
-        
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
       
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      - name: Grant Execute Permission
+        run: chmod +x gradlew
       
-    - name: Accept Android SDK Licenses
-      run: yes | sdkmanager --licenses || true
+      - name: Setup Android SDK
+        run: |
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
       
-    - name: Build Debug APK
-      run: |
-        export GRADLE_OPTS="-Xmx3072m -XX:MaxMetaspaceSize=768m -XX:+UseParallelGC"
-        ./gradlew clean assembleDebug --no-daemon --stacktrace --max-workers=2
+      - name: Accept Licenses
+        run: yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses || true
       
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: netwatch-debug-apk
-        path: app/build/outputs/apk/debug/*.apk
-        retention-days: 30
-        if-no-files-found: error
-        
-    - name: Build Release APK (unsigned)
-      run: ./gradlew assembleRelease --stacktrace --no-daemon
-      continue-on-error: true
+      - name: Gradle Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       
-    - name: Upload Release APK
-      uses: actions/upload-artifact@v4
-      if: always()
-      continue-on-error: true
-      with:
-        name: netwatch-release-apk
-        path: app/build/outputs/apk/release/*.apk
-        retention-days: 30
-        if-no-files-found: warn
+      - name: Build Debug APK
+        run: |
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --stacktrace \
+            --warning-mode all \
+            -Dorg.gradle.jvmargs="-Xmx4096m -XX:MaxMetaspaceSize=1024m" \
+            -Dkotlin.compiler.execution.strategy=in-process \
+            -Dkotlin.incremental=false
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: netwatch-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+          compression-level: 0
